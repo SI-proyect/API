@@ -37,12 +37,15 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "corsheaders",
+    "rest_framework",
     "tasks",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -75,13 +78,20 @@ WSGI_APPLICATION = "api_rest.wsgi.application"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'djongo',
+        'NAME': 'SI',
+        'ENFORCE_SCHEMA': False,
+        'CLIENT': {
+            'host': 'mongodb+srv://jeruah:EMqgnI5Xe2t1xW3G@npca.tsbb2v2.mongodb.net/',
+            'port': 27017,
+            'username': 'jeruah',
+            'password': 'EMqgnI5Xe2t1xW3G',
+            'authSource': 'SI',
+            'authMechanism': 'SCRAM-SHA-1',
+        }
     }
 }
-
-
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
@@ -122,3 +132,6 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+#CORS authorization
+CORS_ALLOWED_ORIGINS = []
