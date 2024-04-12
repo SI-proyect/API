@@ -76,13 +76,20 @@ WSGI_APPLICATION = "api_rest.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
+# conectar la base de datos al proyecto
+DATABASES = {  
+    'default': {  
+        'ENGINE': 'django.db.backends.mysql',  
+        'NAME': 'bytnq74apkjlzfoxnyxi',  
+        'USER': 'u5hauoifzgx2xmdx',  
+        'PASSWORD': 'nQr4CXwoLrwFyJ3QB9Ip',  
+        'HOST': 'bytnq74apkjlzfoxnyxi-mysql.services.clever-cloud.com',  
+        'PORT': '3306',  
+        'OPTIONS': {  
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"  
+        }  
+    }  
+}  
 
 
 # Password validation
