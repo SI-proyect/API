@@ -2,3 +2,5 @@ django
 djangorestframework
 django-cors-headers
 panda
+mysqlclient
+django-environ

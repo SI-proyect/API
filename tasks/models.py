@@ -1,19 +1,42 @@
 from django.db import models
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 
-# Create your models here.
-class User(models.Model):
-    cc = models.IntegerField(default=0)
-    name = models.CharField(max_length=100, default='null') 
-    lastname = models.CharField(max_length=100, default='null')
+class UserManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError('The Email field must be set')
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+
+        return self.create_user(email, password, **extra_fields)
+
+class User(AbstractBaseUser, PermissionsMixin):
+    cc = models.IntegerField(default=0, unique=True)
+    email = models.EmailField(unique=True)
+    name = models.CharField(max_length=100, default='null')
+    last_name = models.CharField(max_length=100, default='null')
     created_at = models.DateTimeField(auto_now_add=True) 
     updated_at = models.DateTimeField(auto_now=True)
-    enabled = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
 
-    def __str__(self) -> str:
-        return self.cc
+    objects = UserManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['cc','name', 'last_name']
+
+    def __str__(self):
+        return "(" + str(self.cc) + ") " + self.name + " " + self.last_name + " <" + self.email + ">"
 
 class Client(models.Model):
-    cc = models.IntegerField(default=0)
+    cc = models.IntegerField(default=0, unique=True)
     name = models.CharField(max_length=100, default='null')
     address = models.CharField(max_length=100, default='null')
     telephone = models.IntegerField(default=0)
@@ -29,7 +52,7 @@ class Client(models.Model):
 
 class Rut(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
-    nit = models.IntegerField(default=0)
+    nit = models.IntegerField(default=0, unique=True)
     check_digit = models.IntegerField(default=0) # Numero de verificacion
     date = models.DateField(default='null') # y m d
     rut_type = models.CharField(max_length=100, default='null')
