@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 
+
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -17,12 +18,13 @@ class UserManager(BaseUserManager):
 
         return self.create_user(email, password, **extra_fields)
 
-class User(AbstractBaseUser, PermissionsMixin):
+
+class User(AbstractBaseUser, PermissionsMixin): #baic information about the user (only 1 for the moment )
     cc = models.IntegerField(default=0, unique=True)
     email = models.EmailField(unique=True)
     name = models.CharField(max_length=100, default='null')
     last_name = models.CharField(max_length=100, default='null')
-    created_at = models.DateTimeField(auto_now_add=True) 
+    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
@@ -30,41 +32,50 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['cc','name', 'last_name']
+    REQUIRED_FIELDS = ['cc', 'name', 'last_name']
 
     def __str__(self):
         return "(" + str(self.cc) + ") " + self.name + " " + self.last_name + " <" + self.email + ">"
 
+
 class Client(models.Model):
-    cc = models.IntegerField(default=0, unique=True)
-    nit = models.IntegerField(default=0, unique=True)
-    name = models.CharField(max_length=100, default='null')
-    address = models.CharField(max_length=100, default='null')
-    telephone = models.IntegerField(default=0)
-    mail = models.CharField(max_length=100, default='null')
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    fiscal_responsibilities = models.BooleanField(default=False)
-    extra = models.CharField(max_length=300, default='null')
-    created_at = models.DateTimeField(auto_now_add=True) 
+    cc = models.IntegerField(default=0, unique=True) #user sets
+    nit = models.IntegerField(default=0, unique=True) #user sets
+    name = models.CharField(max_length=100, default='null') #user sets
+    address = models.CharField(max_length=100, default='null') #user sets
+    telephone = models.IntegerField(default=0) #user sets
+    mail = models.CharField(max_length=100, default='null') #user sets
+    user = models.ForeignKey(User, on_delete=models.CASCADE) #user sets
+    notes = models.CharField(max_length=300, default='null') #user sets
+    fiscal_responsibilities = models.BooleanField(default=False) #false by default but can chage by the rut and the declaration
+    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    enabled = models.BooleanField(default=True)
-    
-    def __str__(self) -> str:
+
+    def __str__(self):
         return self.cc
 
-class Rut(models.Model):
-    client = models.ForeignKey(Client, on_delete=models.CASCADE)
-    nit = models.IntegerField(default=0, unique=True)
-    check_digit = models.IntegerField(default=0) # Numero de verificacion
-    primary_economic_activity = models.IntegerField(default=0)
-    secondary_economic_activity = models.IntegerField(default=0)
-    date = models.DateField(default='null') # y m d
-    rut_type = models.CharField(max_length=100, default='null')
 
-    def __str__(self) -> str:
+class Rut(models.Model):
+    client = models.ForeignKey(Client, on_delete=models.CASCADE) #for nit credential and update the responsabilities
+    nit = models.IntegerField(default=0, unique=True) #document cell and need to be compared with client.nit
+    primary_economic_activity = models.IntegerField(default=0) # document cell
+    secondary_economic_activity = models.IntegerField(default=0) #document cell
+    date = models.DateField(default='null')  # y m d  --> document cell
+    def __str__(self):
         return 'Hola'
 
 class Declaration(models.Model):
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, default='null')
-    ## TODO: Agregar campos para datos que vamos a sacar del pdf de las declaraciones (Jerson)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, default='null') #for nit and primary-activity
+    nit = models.IntegerField(default=0, unique=True) #document cell and ned to be compared with client.nit
+    primary_economic_activity = models.IntegerField(default=0) #alert('need to be the same of the rut.primary') document cell
+    previus_year_anticipation = models.IntegerField(default=0) #alert('need be the same than the below'). Document cell
+    next_year_anticipation = models.IntegerField(default=0) #document cell
+    liquid_heritage = models.IntegerField(default=0) #document cell
+    liquid_income = models.IntegerField(default=0) #document cell. #alert('this < liquid_heritage - liuqid_heritage_previus')document cell
+    net_income_tax = models.IntegerField(default=0) #make the difference betwenn this and the last year tax and if this > 71uvt make alert
+    #beneficiary_income = models.IntegerField
+    unearned_income = models.IntegerField(default=0) #alert('alert if this >= 3500uvt')
+    uvt = models.IntegerField(default=0) #user set
+    date = models.DateField(default='null')
 
+## DEBEMOS REVISAR COMO PROPONER EL INTERCAMBIO DE INFORMACION ENTRE LA DECLARACION DEL AÑO ANTERIOR Y ESTA
