@@ -73,7 +73,8 @@ class Declaration(models.Model):
     liquid_heritage = models.IntegerField(default=0) #document cell
     liquid_income = models.IntegerField(default=0) #document cell. #alert('this < liquid_heritage - liuqid_heritage_previus')document cell
     net_income_tax = models.IntegerField(default=0) #make the difference betwenn this and the last year tax and if this > 71uvt make alert
-    #beneficiary_income = models.IntegerField
+    anual_auditory_benefits = models.IntegerField(default=0)
+    semestrals_auditory_benefits = models.IntegerField(default=0)
     unearned_income = models.IntegerField(default=0) #alert('alert if this >= 3500uvt')
     uvt = models.IntegerField(default=0) #user set
     date = models.DateField(default='null')
