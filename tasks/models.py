@@ -73,10 +73,10 @@ class Declaration(models.Model):
     liquid_heritage = models.IntegerField(default=0) #document cell
     liquid_income = models.IntegerField(default=0) #document cell. #alert('this < liquid_heritage - liuqid_heritage_previus')document cell
     net_income_tax = models.IntegerField(default=0) #make the difference betwenn this and the last year tax and if this > 71uvt make alert
-    anual_auditory_benefits = models.IntegerField(default=0)
-    semestrals_auditory_benefits = models.IntegerField(default=0)
+    anual_auditory_benefits = models.IntegerField(default=0)#user sets
+    semestrals_auditory_benefits = models.IntegerField(default=0) #user sets
     unearned_income = models.IntegerField(default=0) #alert('alert if this >= 3500uvt')
     uvt = models.IntegerField(default=0) #user set
-    date = models.DateField(default='null')
+    date = models.DateField(default='null') #document date. document cell
 
 ## DEBEMOS REVISAR COMO PROPONER EL INTERCAMBIO DE INFORMACION ENTRE LA DECLARACION DEL AÑO ANTERIOR Y ESTA
