@@ -79,4 +79,8 @@ class Declaration(models.Model):
     uvt = models.IntegerField(default=0) #user set
     date = models.DateField(default='null') #document date. document cell
 
+class Calendar(models.Model):
+    digits = models.IntegerField(default=0)
+    date = models.DateField(default='null')
+
 ## DEBEMOS REVISAR COMO PROPONER EL INTERCAMBIO DE INFORMACION ENTRE LA DECLARACION DEL AÑO ANTERIOR Y ESTA
