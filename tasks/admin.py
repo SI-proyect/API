@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User
+from .models import User, Client
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.admin import UserAdmin
 # Register your models here.
@@ -69,4 +69,22 @@ class CustomUserAdmin(UserAdmin):
     ordering = ("id",)
 
 
+class ClientAdmin(admin.ModelAdmin):
+    list_display = (
+            "id",
+            "cc",
+            "nit",
+            "name",
+            "address",
+            "telephone",
+            "mail",
+            "user",
+            "notes",
+            "fiscal_responsibilities"
+    )
+
+    search_fields = ("cc", "nit", "mail")
+
+
+admin.site.register(Client, ClientAdmin)
 admin.site.register(User, CustomUserAdmin)

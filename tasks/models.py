@@ -52,7 +52,7 @@ class Client(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.cc
+        return "(" + str(self.cc) + ") " + self.name + " " + " <" + self.mail + ">"
 
 
 class Rut(models.Model):
@@ -62,7 +62,7 @@ class Rut(models.Model):
     secondary_economic_activity = models.IntegerField(default=0) #document cell
     date = models.DateField(default='null')  # y m d  --> document cell
     def __str__(self):
-        return 'Hola'
+        return str(self.client) + " " + str(self.nit)
 
 class Declaration(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE, default='null') #for nit and primary-activity
@@ -77,7 +77,9 @@ class Declaration(models.Model):
     semestrals_auditory_benefits = models.IntegerField(default=0) #user sets
     unearned_income = models.IntegerField(default=0) #alert('alert if this >= 3500uvt')
     uvt = models.IntegerField(default=0) #user set
-    date = models.DateField(default='null') #document date. document cell
+    date = models.DateField(default=None) #document date. document cell
+
+    #TODO : hacer un __str__ informativo de esto
 
 class Calendar(models.Model):
     digits = models.IntegerField(default=0)
