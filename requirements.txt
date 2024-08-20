@@ -5,3 +5,4 @@ panda
 mysqlclient
 django-environ
 gunicorn
+django-extensions
