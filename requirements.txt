@@ -4,3 +4,4 @@ django-cors-headers
 panda
 mysqlclient
 django-environ
+gunicorn
