@@ -47,3 +47,15 @@ def get_client(request, cc) -> JsonResponse:
     client_serialized = ClientSerializer(client)
     return JsonResponse(data=client_serialized.data, status=status.HTTP_200_OK)
 
+@api_view(["DELETE"])
+def delete_client(request, cc):
+
+    try:
+        client = Client.objects.get(cc=cc)
+    except Client.DoesNotExist:
+        return JsonResponse(data={"message": f"The client with CC {cc} does not exist. Failed to delete client."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+    client.delete()
+
+    return JsonResponse(data={"message": f"Client with CC {cc} deleted successfully."}, status=status.HTTP_200_OK)
