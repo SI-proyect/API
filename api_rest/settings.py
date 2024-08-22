@@ -58,6 +58,10 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+CORS_ORIGIN_WHITELIST = (
+    'http://localhost',
+)
+
 ROOT_URLCONF = "api_rest.urls"
 
 TEMPLATES = [
