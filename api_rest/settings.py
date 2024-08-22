@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-8a*a1#v39a7qrvwzv^=&aoyhsf7*z1==v2xzx-5_#1au4jj+$3"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = "RENDER" not in os.environ
 
 ALLOWED_HOSTS = ['*']
 
@@ -58,8 +58,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-CORS_ORIGIN_WHITELIST = (
-    'http://localhost',
+CORS_ALLOWED_ORIGINS = (
+    'http://localhost:5173',
+    'http://localhost:8000',
 )
 
 ROOT_URLCONF = "api_rest.urls"
