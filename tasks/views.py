@@ -122,6 +122,9 @@ def get_calendar(request) -> JsonResponse:
 
 @api_view(["GET"])
 def get_client_alerts(request, cc) -> JsonResponse:
+
+    data = {}
+    data["warnings"] = {}
     try:
         client = Client.objects.get(cc=cc)
         calendar = Calendar.objects.all()
@@ -135,10 +138,16 @@ def get_client_alerts(request, cc) -> JsonResponse:
                 entry.digits = str(entry.digits)
 
             if str_cc in entry.digits:
-                return JsonResponse(data={"message": f"Alert! Client has a declaration at {entry.date}."},
-                                    status=status.HTTP_200_OK)
+                data["warnings"]["calendar_warning"] = f"Client has a declaration at {entry.date}."
+
+        if len(calendar) == 0:
+            return JsonResponse(data={"message": "There are no calendars to compare."},
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
     except Client.DoesNotExist:
         return JsonResponse(data={"message": f"The client with CC {cc} does not exist."},
                             status=status.HTTP_400_BAD_REQUEST)
+
+    data["message"] = "Successfully returned all warnings."
+    return JsonResponse(data=data, status=status.HTTP_200_OK)
