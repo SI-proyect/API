@@ -72,7 +72,7 @@ def set_calendar(request) -> JsonResponse:
     except Calendar.DoesNotExist:
         pass
 
-    document = request.FILES["file"]
+    document = request.FILES.get("file", None)
     if not document:
         return JsonResponse(data={"message": "No file was uploaded."},
                             status=status.HTTP_400_BAD_REQUEST)
