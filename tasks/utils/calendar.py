@@ -67,6 +67,9 @@ class CalendarExtractor:
         index_rv = [1 if re.match(r'(\d{2})\s*y\s*(\d{2})', line) else 0 for line in lines]
         index_rv = [i for i, x in enumerate(index_rv) if x == 1]
 
+        if index_rv == []:
+            return []
+
         for i in index_rv:
             self.dates.append([lines[i].split(' y '), lines[i+1].split(' día hábil de ')])
 

@@ -88,7 +88,12 @@ def set_calendar(request) -> JsonResponse:
     #extract calendar from pdf
     calendar = CalendarExtractor(file_path)
     calendar.calendar_extractor()
+    if calendar.dates == []:
+        delete_from_media_folder(file_path)
+        return JsonResponse(data={"message": "No calendar was found in the PDF file."},
+                            status=status.HTTP_400_BAD_REQUEST)
     data = calendar.transform_to_dict()
+
     errors = []
 
     #delete file from media folder
@@ -103,7 +108,6 @@ def set_calendar(request) -> JsonResponse:
         serializer = CalendarSerializer(data=entry)
         if serializer.is_valid():
             serializer.save()
-
         else:
             errors.append(serializer.errors)
 
