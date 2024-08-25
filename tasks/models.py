@@ -1,3 +1,5 @@
+from enum import unique
+
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 
@@ -56,7 +58,7 @@ class Client(models.Model):
 
 
 class Rut(models.Model):
-    client = models.ForeignKey(Client, on_delete=models.CASCADE) #for nit credential and update the responsabilities
+    client = models.ForeignKey(Client, on_delete=models.CASCADE) #for nit and primary-activity
     nit = models.IntegerField(default=0, unique=True) #document cell and need to be compared with client.nit
     primary_economic_activity = models.IntegerField(default=0) # document cell
     secondary_economic_activity = models.IntegerField(default=0) #document cell
@@ -65,16 +67,16 @@ class Rut(models.Model):
         return str(self.client) + " " + str(self.nit)
 
 class Declaration(models.Model):
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, default='null') #for nit and primary-activity
-    nit = models.IntegerField(default=0, unique=True) #document cell and ned to be compared with client.nit
+    client = models.ForeignKey(Client, on_delete=models.CASCADE) #for nit and primary-activity
+    nit = models.IntegerField(default=0, unique=False) #document cell and ned to be compared with client.nit
     primary_economic_activity = models.IntegerField(default=0) #alert('need to be the same of the rut.primary') document cell
     previus_year_anticipation = models.IntegerField(default=0) #alert('need be the same than the below'). Document cell
     next_year_anticipation = models.IntegerField(default=0) #document cell
     liquid_heritage = models.IntegerField(default=0) #document cell
     liquid_income = models.IntegerField(default=0) #document cell. #alert('this < liquid_heritage - liuqid_heritage_previus')document cell
     net_income_tax = models.IntegerField(default=0) #make the difference betwenn this and the last year tax and if this > 71uvt make alert
-    anual_auditory_benefits = models.IntegerField(default=0)#user sets
-    semestrals_auditory_benefits = models.IntegerField(default=0) #user sets
+    anual_auditory_benefits = models.CharField(default='null', max_length=100)#user sets
+    semestrals_auditory_benefits = models.CharField(default='null', max_length=100) #user sets
     unearned_income = models.IntegerField(default=0) #alert('alert if this >= 3500uvt')
     uvt = models.IntegerField(default=0) #user set
     date = models.DateField(default=None) #document date. document cell
