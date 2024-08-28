@@ -11,3 +11,5 @@ pytesseract
 Pillow
 python-dateutil
 pdf2image
+geopandas
+geodesic-api
