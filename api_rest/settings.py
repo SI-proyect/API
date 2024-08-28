@@ -88,20 +88,20 @@ AUTH_USER_MODEL = 'tasks.User'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 # conectar la base de datos al proyecto
-DATABASES = {  
-    'default': {  
-        'ENGINE': os.environ.get('ENGINE'),
-        'NAME': os.environ.get('NAME'),
-        'USER': os.environ.get('USER'),
-        'PASSWORD': os.environ.get('PASSWORD'),
-        'HOST': os.environ.get('HOST'),
-        'PORT': os.environ.get('DBPORT'),
-
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('NAME'),
+        'USER': os.getenv('USER'),
+        'PASSWORD': os.getenv('PASSWORD'),
+        'HOST': os.getenv('HOST'),  # Use the service name defined in docker-compose.yml
+        'PORT': '3306',  # Default MySQL port
+    }
+}
         # 'OPTIONS': {
         #     'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
         # }
-    }  
-}  
+
 
 
 # Password validation
