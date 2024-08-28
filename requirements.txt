@@ -7,3 +7,7 @@ django-environ
 gunicorn
 django-extensions
 Pymupdf
+pytesseract
+Pillow
+python-dateutil
+pdf2image

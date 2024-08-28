@@ -61,7 +61,7 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = (
     'http://localhost:5173',
     'http://localhost:8000',
-    'https://front-dian.vercel.app/'
+    'https://front-dian.vercel.app'
 )
 
 ROOT_URLCONF = "api_rest.urls"
