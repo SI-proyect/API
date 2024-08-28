@@ -1,12 +1,15 @@
 from django.shortcuts import render
 from django.http import JsonResponse
+from geodesic.client import client
 from rest_framework.decorators import api_view
 from rest_framework import status
 
-from .serializers import ClientSerializer, CalendarSerializer
-from .models import Client, Calendar
+from .serializers import ClientSerializer, CalendarSerializer, DeclarationSerializer, RutSerializer
+from .models import Client, Calendar, Declaration, Rut
 from .utils.file_controller import set_to_media_folder, delete_from_media_folder
 from .utils.calendar import CalendarExtractor
+from .utils.client_alerts import DatabaseComparer
+from .utils.extractor import PDFExtractor
 import os
 from django.conf import settings
 
@@ -66,12 +69,6 @@ def delete_client(request, cc):
 @api_view(["POST"])
 def set_calendar(request) -> JsonResponse:
 
-    try:
-        calendar = Calendar.objects.all()
-        calendar.delete()
-    except Calendar.DoesNotExist:
-        pass
-
     document = request.FILES.get("file", None)
     if not document:
         return JsonResponse(data={"message": "No file was uploaded."},
@@ -99,13 +96,19 @@ def set_calendar(request) -> JsonResponse:
     #delete file from media folder
     delete_from_media_folder(file_path)
 
+    try:
+        calendar = Calendar.objects.all()
+        calendar.delete()
+    except Calendar.DoesNotExist:
+        pass
+
     for digits, date in data.items():
         entry = {
             'id': 0,
             'digits': digits,
             'date': date
         }
-        serializer = CalendarSerializer(data=entry)
+        serializer: CalendarSerializer = CalendarSerializer(data=entry)
         if serializer.is_valid():
             serializer.save()
         else:
@@ -129,29 +132,123 @@ def get_client_alerts(request, cc) -> JsonResponse:
 
     data = {}
     data["warnings"] = {}
-    try:
+    data["errors"] = {}
+    data["mesages"] = {}
+
+    #compare data
+    comparer = DatabaseComparer(cc)
+    calendar_warning = comparer.compare_calendar()
+    return JsonResponse(data=calendar_warning, status=status.HTTP_200_OK)
+
+@api_view(["POST"])
+def set_declaration(request, cc):
+
+        document = request.FILES.get("file", None)
+        if not document:
+            return JsonResponse(data={"message": "No file was uploaded."},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+        document_name = document.name
+        if not document_name.endswith('.pdf'):
+            delete_from_media_folder(document)
+            return JsonResponse(data={"message": "Invalid file format. Please upload a PDF file."},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+        #set document to media folder
+        file_path = set_to_media_folder(document)
+
         client = Client.objects.get(cc=cc)
-        calendar = Calendar.objects.all()
-        if client:
-            str_cc = str(cc)[-2:]
+        client_nit = client.nit
 
-        for entry in calendar:
-            if entry.digits < 10:
-                entry.digits = f"0{entry.digits}"
-            else:
-                entry.digits = str(entry.digits)
+        #extract calendar from pdf
+        declaration = PDFExtractor(file_path, "2")
+        declaration.extract_text_from_pdf()
+        entry = declaration.get_data()
+        entry["id"] = 0
+        entry["client"] = client.id
+        entry["anual_auditory_benefits"] = request.data.get("anual_auditory_benefits", "null")
+        entry["semestrals_auditory_benefits"] = request.data.get("semestrals_auditory_benefits", "null")
+        entry["uvt"] = request.data.get("uvt", 40000)
+        print(entry)
 
-            if str_cc in entry.digits:
-                data["warnings"]["calendar_warning"] = f"Client has a declaration at {entry.date}."
+        if client_nit != int(entry["nit"]):
+            delete_from_media_folder(file_path)
+            return JsonResponse(data={"message": "Client's NIT does not match with the NIT in the declaration."},
+                                status=status.HTTP_400_BAD_REQUEST)
 
-        if len(calendar) == 0:
-            return JsonResponse(data={"message": "There are no calendars to compare."},
-                            status=status.HTTP_400_BAD_REQUEST)
+        before = Declaration.objects.filter(client=client, date=entry["date"])
+        success_message = {"message": "Declaration was processed successfully."}
+        if before:
+            aditional_string = "You has already uploaded a declaration for this year. The previous declaration will be deleted."
+            success_message["alert"] = aditional_string
+            success_message["type"] = "info"
+            for b in before:
+                b.delete()
+
+        #delete file from media folder
+        delete_from_media_folder(file_path)
+
+        serializer : DeclarationSerializer = DeclarationSerializer(data=entry)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(data=success_message, status=status.HTTP_201_CREATED)
+
+        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-    except Client.DoesNotExist:
-        return JsonResponse(data={"message": f"The client with CC {cc} does not exist."},
-                            status=status.HTTP_400_BAD_REQUEST)
+@api_view(["POST"])
+def set_rut(request, cc):
 
-    data["message"] = "Successfully returned all warnings."
-    return JsonResponse(data=data, status=status.HTTP_200_OK)
+        document = request.FILES.get("file", None)
+        if not document:
+            return JsonResponse(data={"message": "No file was uploaded."},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+        document_name = document.name
+        if not document_name.endswith('.pdf'):
+            delete_from_media_folder(document)
+            return JsonResponse(data={"message": "Invalid file format. Please upload a PDF file."},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+        #set document to media folder
+        file_path = set_to_media_folder(document)
+
+        client = Client.objects.get(cc=cc)
+        client_nit = client.nit
+
+        #extract calendar from pdf
+        rut = PDFExtractor(file_path, "1")
+        rut.extract_text_from_pdf()
+        entry = rut.get_data()
+        entry["id"] = 0
+        entry["client"] = client.id
+
+        if client_nit != int(entry["nit"]):
+            delete_from_media_folder(file_path)
+            return JsonResponse(data={"message": "Client's NIT does not match with the NIT in the RUT."},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+        success_message = {"message": "Rut was processed successfully."}
+        client_ruts = Rut.objects.filter(client=client)
+        if client_ruts:
+            aditional_string = "You has already uploaded a RUT for this client. The previous RUT will be deleted."
+            success_message["alert"] = aditional_string
+            success_message["type"] = "info"
+            for client_rut in client_ruts:
+                client_rut.delete()
+
+        #delete file from media folder
+        delete_from_media_folder(file_path)
+
+        entry['fiscal_responsibilities'] = True
+
+        if entry["fiscal_responsibilities"]:
+            client.fiscal_responsibilities = True
+            client.save()
+
+        serializer : RutSerializer = RutSerializer(data=entry)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(data=success_message, status=status.HTTP_201_CREATED)
+
+        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
