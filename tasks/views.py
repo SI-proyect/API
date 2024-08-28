@@ -195,6 +195,31 @@ def set_declaration(request, cc):
 
         return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(["GET"])
+def get_declaration(request, cc) -> JsonResponse:
+    try:
+        client = Client.objects.get(cc=cc)
+        id = client.id
+        declaration = Declaration.objects.get(client=id)
+    except Declaration.DoesNotExist:
+        return JsonResponse(data={"message": f"The declaration for the client with CC {cc} does not exist."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+    serializer = DeclarationSerializer(declaration)
+    return JsonResponse(data=serializer.data, status=status.HTTP_200_OK)
+
+def get_declaration_by_date(request, cc, year) -> JsonResponse:
+    try:
+        client = Client.objects.get(cc=cc)
+        id = client.id
+        date = f"{year}-01-01"
+        declaration = Declaration.objects.get(client=id, date=date)
+    except Declaration.DoesNotExist:
+        return JsonResponse(data={"message": f"The declaration of de year {year} for the client with CC {cc} does not exist."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+    serializer = DeclarationSerializer(declaration)
+    return JsonResponse(data=serializer.data, status=status.HTTP_200_OK)
 
 @api_view(["POST"])
 def set_rut(request, cc):
@@ -222,6 +247,8 @@ def set_rut(request, cc):
         entry = rut.get_data()
         entry["id"] = 0
         entry["client"] = client.id
+
+        print(entry)
 
         if client_nit != int(entry["nit"]):
             delete_from_media_folder(file_path)
@@ -252,3 +279,16 @@ def set_rut(request, cc):
             return JsonResponse(data=success_message, status=status.HTTP_201_CREATED)
 
         return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["GET"])
+def get_rut(request, cc) -> JsonResponse:
+    try:
+        client = Client.objects.get(cc=cc)
+        id = client.id
+        rut = Rut.objects.get(client=id)
+    except Rut.DoesNotExist:
+        return JsonResponse(data={"message": f"The RUT for the client with CC {cc} does not exist."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+    serializer = RutSerializer(rut)
+    return JsonResponse(data=serializer.data, status=status.HTTP_200_OK)

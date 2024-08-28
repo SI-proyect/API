@@ -12,7 +12,7 @@ class PDFExtractor:
         self.roiRunt = [
             (150.03, 733, 623.97, 60),   # Nit
             (132, 1891, 163, 46),        # Principal actividad Ec
-            (692, 1886, 182.5, 51),      # Segunda ActEco
+            (692, 1886, 170, 51),      # Segunda ActEco
             (259, 2046, 82, 52),         # Responsabilidad1
             (343, 2046, 82, 52),         # Responsabilidad2
             (423, 2046, 82, 52)          # Responsabilidad3
