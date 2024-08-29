@@ -1,5 +1,5 @@
 # Use the official Python image from the Docker Hub
-FROM python:3.12-slim
+FROM python:3.11-buster
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
     poppler-utils \
     tesseract-ocr \
     ghostscript \
-    openjdk-17-jre-headless \
+    default-jdk \
     default-libmysqlclient-dev \
     default-mysql-client \
     pkg-config \

@@ -1,6 +1,6 @@
 # tasks/utils/pdf_extractor.py
 from datetime import datetime
-
+import re
 from pdf2image import convert_from_path
 from PIL import Image, ImageFilter
 import pytesseract
@@ -65,6 +65,9 @@ class PDFExtractor:
     def extract_text_from_pdf(self):
         images = convert_from_path(self.pdf_path, dpi=300)
         for i, image in enumerate(images):
+            if self.selector == "2":
+                target_size = (2550, 3300)
+                image = image.resize(target_size, Image.LANCZOS)
             grayscale_image = image.convert('L')
             for j, roi in enumerate(self.rois):
                 x, y, w, h = roi
@@ -81,7 +84,7 @@ class PDFExtractor:
         self.set_rois_and_json()
         self.extract_text_from_pdf()
         for key, data in self.json_data.items():
-            data = data.replace(".", "").replace(",", "")
+            data = re.sub("[^0-9]", "", data)
             self.json_data[key] = data
         if self.selector == "2":
             self.json_data["date"] = f"{self.json_data['date']}-01-01"
