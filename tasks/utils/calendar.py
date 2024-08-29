@@ -50,16 +50,15 @@ class CalendarExtractor:
         self.dates = []
 
     def calendar_extractor(self):
-        # Open the PDF file
-        pdf_document = fitz.open(self.document)
+        # Open the PDF file from in-memory bytes
+        pdf_document = fitz.open(stream=self.document.read(), filetype="pdf")
         pages_to_read = [9, 10]
 
         # Extract text from the PDF
-        with fitz.open(pdf_document) as doc:
-            text = ""
-            for page_num in pages_to_read:
-                page = doc.load_page(page_num)  # Carga la página específica
-                text += page.get_text()
+        text = ""
+        for page_num in pages_to_read:
+            page = pdf_document.load_page(page_num)  # Carga la página específica
+            text += page.get_text()
         text = text.replace('�', '')
         lines = text.split('\n')
 

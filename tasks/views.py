@@ -79,22 +79,16 @@ def set_calendar(request) -> JsonResponse:
         return JsonResponse(data={"message": "Invalid file format. Please upload a PDF file."},
                             status=status.HTTP_400_BAD_REQUEST)
 
-    #set document to media folder
-    file_path = set_to_media_folder(document)
 
     #extract calendar from pdf
-    calendar = CalendarExtractor(file_path)
+    calendar = CalendarExtractor(document)
     calendar.calendar_extractor()
     if calendar.dates == []:
-        delete_from_media_folder(file_path)
         return JsonResponse(data={"message": "No calendar was found in the PDF file."},
                             status=status.HTTP_400_BAD_REQUEST)
     data = calendar.transform_to_dict()
 
     errors = []
-
-    #delete file from media folder
-    delete_from_media_folder(file_path)
 
     try:
         calendar = Calendar.objects.all()
@@ -155,15 +149,13 @@ def set_declaration(request, cc):
                                 status=status.HTTP_400_BAD_REQUEST)
 
         #set document to media folder
-        file_path = set_to_media_folder(document)
 
         client = Client.objects.get(cc=cc)
         client_nit = client.nit
 
         #extract calendar from pdf
-        declaration = PDFExtractor(file_path, "2")
-        declaration.extract_text_from_pdf()
-        entry = declaration.get_data()
+        document_info = PDFExtractor(document, "2")
+        entry = document_info.get_data()
         entry["id"] = 0
         entry["client"] = client.id
         entry["anual_auditory_benefits"] = request.data.get("anual_auditory_benefits", "null")
@@ -172,7 +164,6 @@ def set_declaration(request, cc):
         print(entry)
 
         if client_nit != int(entry["nit"]):
-            delete_from_media_folder(file_path)
             return JsonResponse(data={"message": "Client's NIT does not match with the NIT in the declaration."},
                                 status=status.HTTP_400_BAD_REQUEST)
 
@@ -186,7 +177,6 @@ def set_declaration(request, cc):
                 b.delete()
 
         #delete file from media folder
-        delete_from_media_folder(file_path)
 
         serializer : DeclarationSerializer = DeclarationSerializer(data=entry)
         if serializer.is_valid():
@@ -236,22 +226,17 @@ def set_rut(request, cc):
                                 status=status.HTTP_400_BAD_REQUEST)
 
         #set document to media folder
-        file_path = set_to_media_folder(document)
 
         client = Client.objects.get(cc=cc)
         client_nit = client.nit
 
         #extract calendar from pdf
-        rut = PDFExtractor(file_path, "1")
-        rut.extract_text_from_pdf()
-        entry = rut.get_data()
+        document_info = PDFExtractor(document, "1")
+        entry = document_info.get_data()
         entry["id"] = 0
         entry["client"] = client.id
 
-        print(entry)
-
         if client_nit != int(entry["nit"]):
-            delete_from_media_folder(file_path)
             return JsonResponse(data={"message": "Client's NIT does not match with the NIT in the RUT."},
                                 status=status.HTTP_400_BAD_REQUEST)
 
@@ -259,19 +244,28 @@ def set_rut(request, cc):
         client_ruts = Rut.objects.filter(client=client)
         if client_ruts:
             aditional_string = "You has already uploaded a RUT for this client. The previous RUT will be deleted."
-            success_message["alert"] = aditional_string
-            success_message["type"] = "info"
+            success_message["alerts"] = {
+                "update": aditional_string,
+                "type": "info"
+            }
             for client_rut in client_ruts:
                 client_rut.delete()
 
-        #delete file from media folder
-        delete_from_media_folder(file_path)
-
-        entry['fiscal_responsibilities'] = True
 
         if entry["fiscal_responsibilities"]:
             client.fiscal_responsibilities = True
             client.save()
+            success_message["alerts"] = {
+                "update": "The client now has IVA fiscal responsibilities.",
+                "type": "info",
+            }
+
+        if entry["fiscal_responsibilities"] == "":
+            entry["fiscal_responsibilities"] = False
+            success_message["alerts"] = {
+                "warning": "The RUT does not have IVA fiscal responsibilities.",
+                "type": "danger"
+            }
 
         serializer : RutSerializer = RutSerializer(data=entry)
         if serializer.is_valid():
@@ -292,3 +286,17 @@ def get_rut(request, cc) -> JsonResponse:
 
     serializer = RutSerializer(rut)
     return JsonResponse(data=serializer.data, status=status.HTTP_200_OK)
+
+@api_view(["POST"])
+def test_files(request):
+    document = request.FILES.get("file", None)
+    if not document:
+        return JsonResponse(data={"message": "No file was uploaded."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+    if not document.name.endswith('.pdf'):
+        return JsonResponse(data={"message": "Invalid file format. Please upload a PDF file."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+
+    return JsonResponse(data={"message": "File was uploaded successfully."}, status=status.HTTP_200_OK)
