@@ -190,7 +190,7 @@ def get_declaration(request, cc) -> JsonResponse:
     try:
         client = Client.objects.get(cc=cc)
         id = client.id
-        declaration = Declaration.objects.get(client=id)
+        declaration = Declaration.objects.filter(client=id)
     except Declaration.DoesNotExist:
         return JsonResponse(data={"message": f"The declaration for the client with CC {cc} does not exist."},
                             status=status.HTTP_400_BAD_REQUEST)
@@ -198,6 +198,7 @@ def get_declaration(request, cc) -> JsonResponse:
     serializer = DeclarationSerializer(declaration)
     return JsonResponse(data=serializer.data, status=status.HTTP_200_OK)
 
+@api_view(["GET"])
 def get_declaration_by_date(request, cc, year) -> JsonResponse:
     try:
         client = Client.objects.get(cc=cc)
@@ -287,16 +288,16 @@ def get_rut(request, cc) -> JsonResponse:
     serializer = RutSerializer(rut)
     return JsonResponse(data=serializer.data, status=status.HTTP_200_OK)
 
-@api_view(["POST"])
-def test_files(request):
-    document = request.FILES.get("file", None)
-    if not document:
-        return JsonResponse(data={"message": "No file was uploaded."},
+@api_view(["GET"])
+def get_rut_by_date(request, cc, year):
+    try:
+        client = Client.objects.get(cc=cc)
+        id = client.id
+        date = f"{year}-01-01"
+        rut = Rut.objects.get(client=id, date=date)
+    except Rut.DoesNotExist:
+        return JsonResponse(data={"message": f"The RUT of de year {year} for the client with CC {cc} does not exist."},
                             status=status.HTTP_400_BAD_REQUEST)
 
-    if not document.name.endswith('.pdf'):
-        return JsonResponse(data={"message": "Invalid file format. Please upload a PDF file."},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-
-    return JsonResponse(data={"message": "File was uploaded successfully."}, status=status.HTTP_200_OK)
+    serializer = RutSerializer(rut)
+    return JsonResponse(data=serializer.data, status=status.HTTP_200_OK)
