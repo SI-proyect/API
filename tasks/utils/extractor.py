@@ -116,7 +116,7 @@ class PDFExtractor:
                     if self.json_data[value] == "48":
                         self.json_data["fiscal_responsibilities"] = True
                     else:
-                        self.json_data["fiscal_responsibilities"] = ""
+                        self.json_data["fiscal_responsibilities"] = False
                 else:
                     self.json_data["fiscal_responsibilities"] = ""
         return self.json_data

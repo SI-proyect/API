@@ -136,7 +136,6 @@ def get_client_alerts(request, cc) -> JsonResponse:
 
 @api_view(["POST"])
 def set_declaration(request, cc):
-
         document = request.FILES.get("file", None)
         if not document:
             return JsonResponse(data={"message": "No file was uploaded."},
@@ -144,7 +143,6 @@ def set_declaration(request, cc):
 
         document_name = document.name
         if not document_name.endswith('.pdf'):
-            delete_from_media_folder(document)
             return JsonResponse(data={"message": "Invalid file format. Please upload a PDF file."},
                                 status=status.HTTP_400_BAD_REQUEST)
 
@@ -195,8 +193,8 @@ def get_declaration(request, cc) -> JsonResponse:
         return JsonResponse(data={"message": f"The declaration for the client with CC {cc} does not exist."},
                             status=status.HTTP_400_BAD_REQUEST)
 
-    serializer = DeclarationSerializer(declaration)
-    return JsonResponse(data=serializer.data, status=status.HTTP_200_OK)
+    serializer = DeclarationSerializer(declaration, many=True)
+    return JsonResponse(data=serializer.data, status=status.HTTP_200_OK, safe=False)
 
 @api_view(["GET"])
 def get_declaration_by_date(request, cc, year) -> JsonResponse:
@@ -253,13 +251,16 @@ def set_rut(request, cc):
                 client_rut.delete()
 
 
-        if entry["fiscal_responsibilities"]:
+        if entry["fiscal_responsibilities"] == True:
             client.fiscal_responsibilities = True
             client.save()
             success_message["alerts"] = {
                 "update": "The client now has IVA fiscal responsibilities.",
                 "type": "info",
             }
+
+        if entry["fiscal_responsibilities"] == False:
+            entry["fiscal_responsibilities"] = False
 
         if entry["fiscal_responsibilities"] == "":
             entry["fiscal_responsibilities"] = False
@@ -283,20 +284,6 @@ def get_rut(request, cc) -> JsonResponse:
         rut = Rut.objects.get(client=id)
     except Rut.DoesNotExist:
         return JsonResponse(data={"message": f"The RUT for the client with CC {cc} does not exist."},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-    serializer = RutSerializer(rut)
-    return JsonResponse(data=serializer.data, status=status.HTTP_200_OK)
-
-@api_view(["GET"])
-def get_rut_by_date(request, cc, year):
-    try:
-        client = Client.objects.get(cc=cc)
-        id = client.id
-        date = f"{year}-01-01"
-        rut = Rut.objects.get(client=id, date=date)
-    except Rut.DoesNotExist:
-        return JsonResponse(data={"message": f"The RUT of de year {year} for the client with CC {cc} does not exist."},
                             status=status.HTTP_400_BAD_REQUEST)
 
     serializer = RutSerializer(rut)
