@@ -87,4 +87,8 @@ class Calendar(models.Model):
     digits = models.IntegerField(default=0)
     date = models.DateField(default='null')
 
+class WatingChanges(models.Model):
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    change_for = models.CharField(max_length=300, default='null')
+    description = models.CharField(max_length=300, default='null')
 ## DEBEMOS REVISAR COMO PROPONER EL INTERCAMBIO DE INFORMACION ENTRE LA DECLARACION DEL AÑO ANTERIOR Y ESTA

@@ -125,9 +125,25 @@ def get_calendar(request) -> JsonResponse:
 def get_client_alerts(request, cc) -> JsonResponse:
 
     data = {}
-    data["warnings"] = {}
-    data["errors"] = {}
-    data["mesages"] = {}
+    data["warnings"] = {
+        # "calendar": {
+        #   message: "The calendar is outdated. Please update it.",
+        #   type: "warning"
+        # },
+        # "declaration": {
+        #   message: "The declaration is outdated. Please update it.",
+        #   type: "warning"
+        # },
+        # "rut": {
+        #   message: "The RUT is outdated. Please update it.",
+        #   type: "warning"
+        # }
+    }
+    data["errors"] = {
+        # "calendar": {
+        #   message: "The calendar is missing. Please upload it.",
+        # },
+    }
 
     #compare data
     comparer = DatabaseComparer(cc)
@@ -263,7 +279,7 @@ def set_rut(request, cc):
         if entry["fiscal_responsibilities"] == "":
             entry["fiscal_responsibilities"] = False
             success_message["alerts"] = {
-                "warning": "The RUT does not have IVA fiscal responsibilities.",
+                "warning": "The RUT does not have IVA fiscal responsibilities. Please update the rut.",
                 "type": "danger"
             }
 
