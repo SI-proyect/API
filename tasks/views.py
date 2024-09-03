@@ -126,29 +126,53 @@ def get_client_alerts(request, cc) -> JsonResponse:
 
     data = {}
     data["warnings"] = {
-        # "calendar": {
-        #   message: "The calendar is outdated. Please update it.",
-        #   type: "warning"
-        # },
-        # "declaration": {
-        #   message: "The declaration is outdated. Please update it.",
-        #   type: "warning"
-        # },
-        # "rut": {
-        #   message: "The RUT is outdated. Please update it.",
-        #   type: "warning"
-        # }
+        "calendar": {
+          # message: "The calendar is outdated. Please update it.",
+          # type: "warning"
+        },
+        "declaration": {
+          # message: "The declaration is outdated. Please update it.",
+          # type: "warning"
+        },
+        "rut": {
+          # message: "The RUT is outdated. Please update it.",
+          # type: "warning"
+        }
     }
     data["errors"] = {
-        # "calendar": {
+        "calendar": {
         #   message: "The calendar is missing. Please upload it.",
-        # },
+        },
+        "declaration": {
+
+        },
     }
 
-    #compare data
+    #comparer data
     comparer = DatabaseComparer(cc)
+
+    # for calendar
     calendar_warning = comparer.compare_calendar()
-    return JsonResponse(data=calendar_warning, status=status.HTTP_200_OK)
+    if "error" in calendar_warning:
+        data["errors"]["calendar"]["message"] = calendar_warning["error"]
+        data["errors"]["calendar"]["type"] = "danger"
+    else:
+        data["warnings"]["calendar"]["message"] = calendar_warning["calendar_warning"]
+        data["warnings"]["calendar"]["type"] = "warning"
+
+    declaration_warning = comparer.compare_declaration()
+    print(declaration_warning)
+    if "error" in declaration_warning:
+        data["errors"]["declaration"]["message"] = declaration_warning["error"]
+        data["errors"]["declaration"]["type"] = "danger"
+
+    if "issue" in declaration_warning:
+        data["errors"]["declaration"]["message"] = declaration_warning["issue"]
+        data["errors"]["declaration"]["type"] = "danger"
+
+    data["warnings"]["declaration"] = declaration_warning["declaration"]
+
+    return JsonResponse(data=data, status=status.HTTP_200_OK)
 
 @api_view(["POST"])
 def set_declaration(request, cc):
