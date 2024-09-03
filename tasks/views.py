@@ -152,7 +152,6 @@ def get_client_alerts(request, cc) -> JsonResponse:
 
 @api_view(["POST"])
 def set_declaration(request, cc):
-
         document = request.FILES.get("file", None)
         if not document:
             return JsonResponse(data={"message": "No file was uploaded."},
@@ -160,7 +159,6 @@ def set_declaration(request, cc):
 
         document_name = document.name
         if not document_name.endswith('.pdf'):
-            delete_from_media_folder(document)
             return JsonResponse(data={"message": "Invalid file format. Please upload a PDF file."},
                                 status=status.HTTP_400_BAD_REQUEST)
 
@@ -206,14 +204,15 @@ def get_declaration(request, cc) -> JsonResponse:
     try:
         client = Client.objects.get(cc=cc)
         id = client.id
-        declaration = Declaration.objects.get(client=id)
+        declaration = Declaration.objects.filter(client=id)
     except Declaration.DoesNotExist:
         return JsonResponse(data={"message": f"The declaration for the client with CC {cc} does not exist."},
                             status=status.HTTP_400_BAD_REQUEST)
 
-    serializer = DeclarationSerializer(declaration)
-    return JsonResponse(data=serializer.data, status=status.HTTP_200_OK)
+    serializer = DeclarationSerializer(declaration, many=True)
+    return JsonResponse(data=serializer.data, status=status.HTTP_200_OK, safe=False)
 
+@api_view(["GET"])
 def get_declaration_by_date(request, cc, year) -> JsonResponse:
     try:
         client = Client.objects.get(cc=cc)
@@ -268,13 +267,16 @@ def set_rut(request, cc):
                 client_rut.delete()
 
 
-        if entry["fiscal_responsibilities"]:
+        if entry["fiscal_responsibilities"] == True:
             client.fiscal_responsibilities = True
             client.save()
             success_message["alerts"] = {
                 "update": "The client now has IVA fiscal responsibilities.",
                 "type": "info",
             }
+
+        if entry["fiscal_responsibilities"] == False:
+            entry["fiscal_responsibilities"] = False
 
         if entry["fiscal_responsibilities"] == "":
             entry["fiscal_responsibilities"] = False
@@ -302,17 +304,3 @@ def get_rut(request, cc) -> JsonResponse:
 
     serializer = RutSerializer(rut)
     return JsonResponse(data=serializer.data, status=status.HTTP_200_OK)
-
-@api_view(["POST"])
-def test_files(request):
-    document = request.FILES.get("file", None)
-    if not document:
-        return JsonResponse(data={"message": "No file was uploaded."},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-    if not document.name.endswith('.pdf'):
-        return JsonResponse(data={"message": "Invalid file format. Please upload a PDF file."},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-
-    return JsonResponse(data={"message": "File was uploaded successfully."}, status=status.HTTP_200_OK)

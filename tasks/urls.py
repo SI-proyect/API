@@ -6,12 +6,10 @@ from .views import (
     delete_client,
     set_calendar,
     get_calendar, get_client_alerts, set_declaration, set_rut, get_rut, get_declaration, get_declaration_by_date,
-    test_files,
 )
 
 CLIENT_ENDPOINT_INIT = "clients"
 CALENDAR_ENDPOINT_INIT = "calendar"
-TEST_ENDPOINT_INIT = "test"
 
 urlpatterns = [
         path(CLIENT_ENDPOINT_INIT + "/create", create_client, name="create_client"),
@@ -26,5 +24,4 @@ urlpatterns = [
         path(CLIENT_ENDPOINT_INIT + "/<int:cc>/rut", get_rut, name="get_rut"),
         path(CLIENT_ENDPOINT_INIT + "/<int:cc>/declaration", get_declaration, name="get_declaration"),
         path(CLIENT_ENDPOINT_INIT + "/<int:cc>/declaration/<int:year>", get_declaration_by_date, name="get_declaration_by_date"),
-        path(TEST_ENDPOINT_INIT, test_files, name="test"),
         ]

@@ -4,8 +4,8 @@ class DatabaseComparer:
     def __init__(self, cc):
         self.clients = Client.objects.get(cc=cc)
         self.nit = self.clients.nit
-        self.declarations = Declaration.objects.get(nit=self.nit)
-        self.ruts = Rut.objects.get(nit=self.nit)
+        self.declarations = Declaration.objects.filter(nit=self.nit)
+        self.ruts = Rut.objects.filter(nit=self.nit)
         self.calendars = Calendar.objects.all()
         self.cc = cc
         self.compared_data = {
