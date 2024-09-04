@@ -6,7 +6,6 @@ from rest_framework import status
 
 from .serializers import ClientSerializer, CalendarSerializer, DeclarationSerializer, RutSerializer
 from .models import Client, Calendar, Declaration, Rut
-from .utils.file_controller import set_to_media_folder, delete_from_media_folder
 from .utils.calendar import CalendarExtractor
 from .utils.client_alerts import DatabaseComparer
 from .utils.extractor import PDFExtractor
@@ -322,7 +321,6 @@ def set_rut(request, cc):
 
         document_name = document.name
         if not document_name.endswith('.pdf'):
-            delete_from_media_folder(document)
             return JsonResponse(data={"message": "Invalid file format. Please upload a PDF file."},
                                 status=status.HTTP_400_BAD_REQUEST)
 
