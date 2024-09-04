@@ -45,7 +45,7 @@ class Client(models.Model):
     nit = models.IntegerField(default=0, unique=True) #user sets
     name = models.CharField(max_length=100, default='null') #user sets
     address = models.CharField(max_length=100, default='null') #user sets
-    telephone = models.IntegerField(default=0) #user sets
+    telephone = models.BigIntegerField(default=0) #user sets
     mail = models.CharField(max_length=100, default='null') #user sets
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     notes = models.CharField(max_length=300, default='null') #user sets

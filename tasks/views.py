@@ -67,6 +67,28 @@ def delete_client(request, cc):
 
     return JsonResponse(data={"message": f"Client with CC {cc} deleted successfully."}, status=status.HTTP_200_OK)
 
+@api_view(["PUT"])
+def update_client(request, cc) -> JsonResponse:
+
+    try:
+        client = Client.objects.get(cc=cc)
+        user = client.user
+    except Client.DoesNotExist:
+        return JsonResponse(data={"message": f"The client with CC {cc} does not exist. Failed to update client."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+    data = request.data.copy()
+    data["user"] = user.id
+
+    serializer : ClientSerializer = ClientSerializer(client, data=data)
+
+    if serializer.is_valid():
+        serializer.save()
+        return JsonResponse(data={"message": f"Client with CC {cc} updated successfully."},
+                            status=status.HTTP_200_OK)
+
+    return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 @api_view(["POST"])
 def set_calendar(request) -> JsonResponse:
 
@@ -211,7 +233,6 @@ def set_declaration(request, cc):
         entry["anual_auditory_benefits"] = request.data.get("anual_auditory_benefits", "null")
         entry["semestrals_auditory_benefits"] = request.data.get("semestrals_auditory_benefits", "null")
         entry["uvt"] = request.data.get("uvt", 40000)
-        print(entry)
 
         if client_nit != int(entry["nit"]):
             return JsonResponse(data={"message": "Client's NIT does not match with the NIT in the declaration."},
@@ -226,7 +247,6 @@ def set_declaration(request, cc):
             for b in before:
                 b.delete()
 
-        #delete file from media folder
 
         serializer : DeclarationSerializer = DeclarationSerializer(data=entry)
         if serializer.is_valid():
@@ -261,6 +281,29 @@ def get_declaration_by_date(request, cc, year) -> JsonResponse:
 
     serializer = DeclarationSerializer(declaration)
     return JsonResponse(data=serializer.data, status=status.HTTP_200_OK)
+
+@api_view(["PUT"])
+def update_declaration(request, cc, year) -> JsonResponse:
+    try:
+        client = Client.objects.get(cc=cc)
+        id = client.id
+        date = f"{year}-01-01"
+        declaration = Declaration.objects.get(client=id, date=date)
+    except Declaration.DoesNotExist:
+        return JsonResponse(data={"message": f"The declaration of de year {year} for the client with CC {cc} does not exist. Failed to update declaration."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+    data = request.data.copy()
+    data["client"] = id
+
+    serializer : DeclarationSerializer = DeclarationSerializer(declaration, data=data)
+
+    if serializer.is_valid():
+        serializer.save()
+        return JsonResponse(data={"message": f"Declaration of the year {year} for the client with CC {cc} updated successfully."},
+                            status=status.HTTP_200_OK)
+
+    return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])
 def set_rut(request, cc):
@@ -340,3 +383,5 @@ def get_rut(request, cc) -> JsonResponse:
 
     serializer = RutSerializer(rut)
     return JsonResponse(data=serializer.data, status=status.HTTP_200_OK)
+
+
