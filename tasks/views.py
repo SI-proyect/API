@@ -181,6 +181,9 @@ def get_client_alerts(request, cc) -> JsonResponse:
         "declaration": {
 
         },
+        "rut": {
+
+        }
     }
 
     #comparer data
@@ -205,6 +208,11 @@ def get_client_alerts(request, cc) -> JsonResponse:
         data["errors"]["declaration"]["type"] = "danger"
 
     data["warnings"]["declaration"] = declaration_warning["declaration"]
+
+    rut_warning = comparer.compare_rut()
+    if "issue" in rut_warning:
+        data["errors"]["rut"]["message"] = rut_warning["issue"]
+        data["errors"]["rut"]["type"] = "danger"
 
     return JsonResponse(data=data, status=status.HTTP_200_OK)
 

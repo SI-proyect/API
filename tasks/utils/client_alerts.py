@@ -80,3 +80,13 @@ class DatabaseComparer:
 
         return compared_data
 
+    def compare_rut(self):
+        compared_data = {}
+        primary_economic_activity = self.rut.primary_economic_activity
+        actual_declaration = self.declarations[0]
+
+        if primary_economic_activity != actual_declaration.primary_economic_activity:
+            compared_data["issue"] = "Primary economic activity is different from the RUT's primary economic activity."
+            compared_data["type"] = "warning"
+            return compared_data
+
