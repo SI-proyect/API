@@ -47,7 +47,7 @@ class Client(models.Model):
     address = models.CharField(max_length=100, default='null') #user sets
     telephone = models.IntegerField(default=0) #user sets
     mail = models.CharField(max_length=100, default='null') #user sets
-    user = models.ForeignKey(User, on_delete=models.CASCADE) #user sets
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     notes = models.CharField(max_length=300, default='null') #user sets
     fiscal_responsibilities = models.BooleanField(default=False) #false by default but can chage by the rut and the declaration
     created_at = models.DateTimeField(auto_now_add=True)

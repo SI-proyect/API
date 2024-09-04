@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from geodesic.client import client
+from regutil import error
 from rest_framework.decorators import api_view
 from rest_framework import status
 
@@ -116,10 +117,22 @@ def set_calendar(request) -> JsonResponse:
 
 @api_view(["GET"])
 def get_calendar(request) -> JsonResponse:
+    data = {}
     calendar = Calendar.objects.all()
-    serializer = CalendarSerializer(calendar, many=True)
+    clients = Client.objects.all()
 
-    return JsonResponse(data=serializer.data, status=status.HTTP_200_OK, safe=False)
+    for client in clients:
+        cc = client.cc
+        comparer = DatabaseComparer(cc)
+        calendar_warning = comparer.compare_calendar()
+        if "error" in calendar_warning:
+            return JsonResponse(data={"message": calendar_warning["error"]},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+
+        data[cc] = calendar_warning["calendar_warning"]
+
+    return JsonResponse(data=data, status=status.HTTP_200_OK)
 
 @api_view(["GET"])
 def get_client_alerts(request, cc) -> JsonResponse:
@@ -161,7 +174,6 @@ def get_client_alerts(request, cc) -> JsonResponse:
         data["warnings"]["calendar"]["type"] = "warning"
 
     declaration_warning = comparer.compare_declaration()
-    print(declaration_warning)
     if "error" in declaration_warning:
         data["errors"]["declaration"]["message"] = declaration_warning["error"]
         data["errors"]["declaration"]["type"] = "danger"
