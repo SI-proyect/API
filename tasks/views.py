@@ -138,12 +138,11 @@ def set_calendar(request) -> JsonResponse:
 @api_view(["GET"])
 def get_calendar(request) -> JsonResponse:
     data = {}
+    calendars = Calendar.objects.all()
     clients = Client.objects.all()
 
-    try:
-        calendar = Calendar.objects.all()
-    except Calendar.DoesNotExist:
-        return JsonResponse(data={"message": "The calendar does not exist."},
+    if not calendars:
+        return JsonResponse(data={"message": "There are no calendars to compare."},
                             status=status.HTTP_400_BAD_REQUEST)
 
     for client in clients:
