@@ -142,7 +142,7 @@ def get_calendar(request) -> JsonResponse:
     clients = Client.objects.all()
 
     if not calendars.exists():
-        return JsonResponse(data={"message": "There are no calendars to compare."},
+        return JsonResponse(data={"message": "No calendars were found."},
                             status=status.HTTP_400_BAD_REQUEST)
 
     for client in clients:
