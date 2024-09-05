@@ -12,8 +12,8 @@ class PDFExtractor:
         self.selector = selector
         self.roiRunt = [
             (150.03, 733, 623.97, 60),   # Nit
-            (132, 1891, 163, 46),        # Principal actividad Ec
-            (690, 1885, 170, 51),        # Segunda ActEco
+            (132, 1891, 163, 50),        # Principal actividad Ec
+            (690, 1891, 167, 50),        # Segunda ActEco
             (259, 2046, 82, 52),         # Responsabilidad1
             (343, 2046, 82, 52),         # Responsabilidad2
             (424, 2046, 82, 52)          # Responsabilidad3
