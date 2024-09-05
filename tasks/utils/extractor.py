@@ -25,7 +25,7 @@ class PDFExtractor:
             (2006, 2646, 471, 46),       # 4 Anticipo year siguiente
             (2216, 2299, 272, 40),       # 5 Impuesto neto de renta
             (2027, 897, 444, 38),        # 6 Ingresos por rentas no laborales
-            (338, 691, 470, 51),         # 7 Nit
+            (335, 691, 467, 51),         # 7 Nit
             (2222, 796, 258, 50),        # 8 Patrimonio líquido
             (525, 1700, 448, 44),        # 9 Renta liq1
             (2034, 1699, 434, 42),       # 10 Renta liq2
