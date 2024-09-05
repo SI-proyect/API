@@ -4,12 +4,13 @@ class DatabaseComparer:
     def __init__(self, cc):
         self.client = Client.objects.get(cc=cc)
         self.nit = self.client.nit
-        self.declarations = Declaration.objects.filter(nit=self.nit).order_by("-date")[:2]
-        self.rut = Rut.objects.get(nit=self.nit)
-        self.calendars = Calendar.objects.all()
+        self.declarations = None
+        self.rut = None
+        self.calendars = None
         self.cc = cc
 
     def compare_calendar(self):
+        self.calendars = Calendar.objects.all()
         compared_data = {}
         cc_digits = str(self.cc)[-2:]
         if len(self.calendars) == 0:
@@ -27,6 +28,7 @@ class DatabaseComparer:
                 return compared_data
 
     def compare_declaration(self):
+        self.declarations = Declaration.objects.filter(nit=self.nit).order_by("-date")[:2]
         compared_data = {
             "issue": None,
             "error": {},
@@ -81,6 +83,7 @@ class DatabaseComparer:
         return compared_data
 
     def compare_rut(self):
+        self.rut = Rut.objects.get(nit=self.nit)
         compared_data = {}
         primary_economic_activity = self.rut.primary_economic_activity
         actual_declaration = self.declarations[0]
