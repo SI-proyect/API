@@ -137,7 +137,7 @@ def set_calendar(request) -> JsonResponse:
 
 @api_view(["GET"])
 def get_calendar(request) -> JsonResponse:
-    data = {}
+    data = []
     calendars = Calendar.objects.all()
     clients = Client.objects.all()
 
@@ -154,9 +154,9 @@ def get_calendar(request) -> JsonResponse:
                                 status=status.HTTP_400_BAD_REQUEST)
 
 
-        data[cc] = calendar_warning["calendar_warning"]
+        data.append(calendar_warning)
 
-    return JsonResponse(data=data, status=status.HTTP_200_OK)
+    return JsonResponse(data=data, status=status.HTTP_200_OK, safe=False)
 
 @api_view(["GET"])
 def get_client_alerts(request, cc) -> JsonResponse:
