@@ -69,7 +69,7 @@ class DatabaseComparer:
             compared_data["declaration"]["liquid_income"]["type"] = "danger"
 
         # for the primary economic activity
-        if actual_declaration.primary_economic_activity != self.rut[0].primary_economic_activity:
+        if actual_declaration.primary_economic_activity != self.rut.primary_economic_activity:
             compared_data["declaration"]["primary_economic_activity"] = {"message": "Primary economic activity is different from the RUT's primary economic activity."}
             compared_data["declaration"]["primary_economic_activity"]["type"] = "warning"
 
