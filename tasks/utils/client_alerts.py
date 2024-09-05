@@ -25,6 +25,10 @@ class DatabaseComparer:
             if cc_digits in calendar.digits:
                 compared_data["type"] = "info"
                 compared_data["calendar_warning"] = f"Client with name: '{self.client.name}' has a declaration at {calendar.date}."
+                compared_data["date"] = calendar.date
+                compared_data["digits"] = calendar.digits
+                compared_data["cc"] = self.cc
+                compared_data["name"] = self.client.name
                 return compared_data
 
     def compare_declaration(self):
