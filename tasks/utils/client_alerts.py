@@ -27,7 +27,7 @@ class DatabaseComparer:
                 calendar.digits = str(calendar.digits)
             if cc_digits in calendar.digits:
                 self.warnings.append({
-                        "message": f"EL cliente {self.client.name} tiene que presentar su declaracion el dia f{calendar.date}",
+                        "message": f"EL cliente {self.client.name} tiene que presentar su declaracion el dia {calendar.date}",
                         "type": "warning",
                         "cc": self.cc,
                         "date": calendar.date,
