@@ -161,62 +161,34 @@ def get_calendar(request) -> JsonResponse:
 @api_view(["GET"])
 def get_client_alerts(request, cc) -> JsonResponse:
 
-    data = {}
-    data["warnings"] = {
-        "calendar": {
-          # message: "The calendar is outdated. Please update it.",
-          # type: "warning"
-        },
-        "declaration": {
-          # message: "The declaration is outdated. Please update it.",
-          # type: "warning"
-        },
-        "rut": {
-          # message: "The RUT is outdated. Please update it.",
-          # type: "warning"
-        }
-    }
-    data["errors"] = {
-        "calendar": {
-        #   message: "The calendar is missing. Please upload it.",
-        },
-        "declaration": {
+    try:
+        client = Client.objects.get(cc=cc)
+    except Client.DoesNotExist:
+        return JsonResponse(data={"message": f"The client with CC {cc} does not exist. Failed to update client."},
+                            status=status.HTTP_400_BAD_REQUEST)
 
-        },
-        "rut": {
-
-        }
-    }
-
+    warnings = []
     #comparer data
+
     comparer = DatabaseComparer(cc)
+
 
     # for calendar
     calendar_warning = comparer.compare_calendar()
-    if "error" in calendar_warning:
-        data["errors"]["calendar"]["message"] = calendar_warning["error"]
-        data["errors"]["calendar"]["type"] = "danger"
-    else:
-        data["warnings"]["calendar"]["message"] = calendar_warning["calendar_warning"]
-        data["warnings"]["calendar"]["type"] = "warning"
+    warnings.extend(calendar_warning)
 
-    declaration_warning = comparer.compare_declaration()
-    if "error" in declaration_warning:
-        data["errors"]["declaration"]["message"] = declaration_warning["error"]
-        data["errors"]["declaration"]["type"] = "danger"
+    try:
+        declaration_warning = comparer.compare_declaration()
+        warnings.extend(declaration_warning)
 
-    if "issue" in declaration_warning:
-        data["errors"]["declaration"]["message"] = declaration_warning["issue"]
-        data["errors"]["declaration"]["type"] = "danger"
+        rut_warning = comparer.compare_rut()
+        warnings.extend(rut_warning)
 
-    data["warnings"]["declaration"] = declaration_warning["declaration"]
+    except Rut.DoesNotExist:
+        return JsonResponse(data={"message": f"The client does not have an available Rut."},
+                            status=status.HTTP_400_BAD_REQUEST)
 
-    rut_warning = comparer.compare_rut()
-    if "issue" in rut_warning:
-        data["errors"]["rut"]["message"] = rut_warning["issue"]
-        data["errors"]["rut"]["type"] = "danger"
-
-    return JsonResponse(data=data, status=status.HTTP_200_OK)
+    return JsonResponse(data=warnings, status=status.HTTP_200_OK, safe=False)
 
 @api_view(["POST"])
 def set_declaration(request, cc):

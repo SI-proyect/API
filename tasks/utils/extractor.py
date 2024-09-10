@@ -6,6 +6,7 @@ import pytesseract
 import fitz
 import io
 
+#pytesseract.pytesseract.tesseract_cmd = "C:\\Users\\Esteban\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe"
 class PDFExtractor:
     def __init__(self, pdf_file, selector):
         self.pdf_file = pdf_file
@@ -20,7 +21,7 @@ class PDFExtractor:
         ]
         self.roiDeclaration = [
             (276, 749, 203, 45),         # 1 Actividad Ec
-            (270, 256, 180, 50),         # 2 Year
+            (270, 255, 182, 52),         # 2 Year
             (2066, 2498, 481, 37),       # 3 Anticipo year anterior
             (2006, 2646, 471, 46),       # 4 Anticipo year siguiente
             (2216, 2299, 272, 40),       # 5 Impuesto neto de renta
