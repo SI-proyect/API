@@ -242,7 +242,7 @@ def get_declaration(request, cc) -> JsonResponse:
     try:
         client = Client.objects.get(cc=cc)
         id = client.id
-        declaration = Declaration.objects.filter(client=id)
+        declaration = Declaration.objects.filter(client=id).order_by("-date")
     except Declaration.DoesNotExist:
         return JsonResponse(data={"message": f"The declaration for the client with CC {cc} does not exist."},
                             status=status.HTTP_400_BAD_REQUEST)
